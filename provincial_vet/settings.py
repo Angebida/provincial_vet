@@ -24,13 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-secret-key-here')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # Set to True temporarily for testing
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']  # This will allow all hosts temporarily
-                      # Change to your specific domain in production
+# Update with your PythonAnywhere domain
+ALLOWED_HOSTS = ['your_username.pythonanywhere.com']
 
 # CSRF Settings
-CSRF_TRUSTED_ORIGINS = ['https://*.pythonanywhere.com']
+CSRF_TRUSTED_ORIGINS = [
+    'https://your_username.pythonanywhere.com'
+]
 
 
 # Application definition
@@ -129,14 +131,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'  # Add leading slash
+# Static files configuration for production
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files
-MEDIA_URL = '/media/'  # Add media URL configuration
+# Media files configuration
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Add Crispy Forms settings
@@ -166,5 +169,5 @@ EMAIL_SUBJECT_PREFIX = '[MPVO] '
 PASSWORD_RESET_TIMEOUT = 86400  # 24 hours in seconds
 SITE_NAME = 'Masbate Provincial Veterinary Office'
 
-# Site URL for email verification links
-SITE_URL = 'http://127.0.0.1:8000'  # Update this with your actual domain in production
+# Site URL for production
+SITE_URL = 'https://your_username.pythonanywhere.com'
