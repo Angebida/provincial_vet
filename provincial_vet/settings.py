@@ -21,22 +21,13 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'your-default-secret-key-here')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-# Update with your PythonAnywhere domain
-ALLOWED_HOSTS = ['your_username.pythonanywhere.com']
-
-# CSRF Settings
-CSRF_TRUSTED_ORIGINS = [
-    'https://your_username.pythonanywhere.com'
-]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -135,15 +126,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-# Static files configuration for production
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Static files configuration
+STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files configuration
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Add Crispy Forms settings
@@ -173,5 +164,5 @@ EMAIL_SUBJECT_PREFIX = '[MPVO] '
 PASSWORD_RESET_TIMEOUT = 86400  # 24 hours in seconds
 SITE_NAME = 'Masbate Provincial Veterinary Office'
 
-# Site URL for production
-SITE_URL = 'https://your_username.pythonanywhere.com'
+# Site URL for development
+SITE_URL = 'http://127.0.0.1:8000'
