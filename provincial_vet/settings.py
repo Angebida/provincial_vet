@@ -25,9 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'your-default-secret-key-here')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['Angebida.pythonanywhere.com']
+
+# CSRF Settings for PythonAnywhere
+CSRF_TRUSTED_ORIGINS = ['https://Angebida.pythonanywhere.com']
 
 
 # Application definition
@@ -127,14 +130,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 # Static files configuration
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files configuration
-MEDIA_URL = 'media/'
+# Media files configuration 
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Add Crispy Forms settings
@@ -164,5 +167,5 @@ EMAIL_SUBJECT_PREFIX = '[MPVO] '
 PASSWORD_RESET_TIMEOUT = 86400  # 24 hours in seconds
 SITE_NAME = 'Masbate Provincial Veterinary Office'
 
-# Site URL for development
-SITE_URL = 'http://127.0.0.1:8000'
+# Site URL for production
+SITE_URL = 'https://Angebida.pythonanywhere.com'
