@@ -1,0 +1,814 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="dashboard container-fluid">
+    <!-- Total Supplies Overview -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card supply-total-card bg-gradient-primary text-white">
+                <div class="card-body d-flex align-items-center">
+                    <div class="icon-box rounded-circle">
+                        <i class="bi bi-capsule display-4"></i>
+                    </div>
+                    <div>
+                        <span class="status-label d-block">Total Inventory</span>
+                        <h2 class="display-3 mb-0">{{ type_chart_data.series.0 }}</h2>
+                        <p class="description">Veterinary Supplies in Stock</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card supply-total-card bg-gradient-info text-white">
+                <div class="card-body d-flex align-items-center">
+                    <div class="icon-box rounded-circle">
+                        <i class="bi bi-printer display-4"></i>
+                    </div>
+                    <div>
+                        <span class="status-label d-block">Total Inventory</span>
+                        <h2 class="display-3 mb-0">{{ type_chart_data.series.1 }}</h2>
+                        <p class="description">Office Supplies in Stock</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <section class="analytics mb-4">
+        <div class="row g-4">
+            <!-- Total Supplies Card -->
+            <div class="col-xl-6">
+                <div class="card analytic-card h-100 shadow-sm border-0">
+                    <div class="card-header border-0 bg-transparent">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="bi bi-boxes text-primary me-2"></i>Total Supplies
+                            </h5>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary active" data-range="month">
+                                    <i class="bi bi-calendar3"></i> This Month
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-range="week">
+                                    <i class="bi bi-calendar3"></i> This Week
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="supplyTrendChart" style="height: 350px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Distribution -->
+            <div class="col-xl-6">
+                <div class="card analytic-card h-100 shadow-sm border-0">
+                    <div class="card-header border-0 bg-transparent">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="bi bi-pie-chart-fill text-primary me-2"></i>Distribution
+                            </h5>
+                            <button class="btn btn-sm btn-outline-secondary" id="refreshChart">
+                                <i class="bi bi-arrow-repeat"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="stockDistributionChart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Summary -->
+            <div class="col-xl-8">
+                <div class="card analytic-card h-100 shadow-sm border-0">
+                    <div class="card-header border-0 bg-transparent">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="bi bi-activity text-primary me-2"></i>Activity Summary
+                            </h5>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary active" data-range="week">Week</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-range="month">Month</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="activityChart" style="height: 350px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="col-xl-4">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card bg-primary text-white shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon bg-white bg-opacity-25 rounded-3 p-3 me-3">
+                                        <i class="bi bi-boxes fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="text-uppercase mb-1 text-white-50">Total Items</h6>
+                                        <h2 class="mb-0 display-6">{{ total_supplies }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card bg-success text-white shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon bg-white bg-opacity-25 rounded-3 p-3 me-3">
+                                        <i class="bi bi-arrow-repeat fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="text-uppercase mb-1 text-white-50">Today's Movements</h6>
+                                        <h2 class="mb-0 display-6">{{ activity_stats.today_movements }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Status Cards -->
+    <section class="overview mb-4">
+        <div class="row g-4">
+            <!-- Low Stock Card -->
+            <div class="col-md-4">
+                <article class="card status-card bg-gradient-danger text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="status-icon flex-shrink-0 me-3 bg-white bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                            </div>
+                            <div>
+                                <h6 class="status-label text-uppercase mb-1">Low Stock Alert</h6>
+                                <h2 class="status-value mb-0">
+                                    {{ stock_status.low.vet|add:stock_status.low.office }}
+                                </h2>
+                                <small class="text-white-50">Total Items</small>
+                            </div>
+                        </div>
+                        <div class="status-details px-2 py-2 rounded bg-white bg-opacity-10 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>
+                                    <i class="bi bi-capsule text-danger me-1"></i> Veterinary
+                                </span>
+                                <span class="fw-bold">{{ stock_status.low.vet }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="bi bi-printer text-primary me-1"></i> Office
+                                </span>
+                                <span class="fw-bold">{{ stock_status.low.office }}</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'dashboard' %}?filter=low" class="btn btn-light btn-sm w-100 mt-2">
+                            <i class="bi bi-eye me-1"></i>View Details
+                        </a>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Expiring Soon Card -->
+            <div class="col-md-4">
+                <article class="card status-card bg-gradient-warning text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="status-icon flex-shrink-0 me-3 bg-white bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-clock-history fs-2"></i>
+                            </div>
+                            <div>
+                                <h6 class="status-label text-uppercase mb-1">Expiring Soon</h6>
+                                <h2 class="status-value mb-0">
+                                    {{ expiring_soon_count.vet|add:expiring_soon_count.office }}
+                                </h2>
+                                <small class="text-white-50">Total Items</small>
+                            </div>
+                        </div>
+                        <div class="status-details px-2 py-2 rounded bg-white bg-opacity-10 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>
+                                    <i class="bi bi-capsule text-warning me-1"></i> Veterinary
+                                </span>
+                                <span class="fw-bold">{{ expiring_soon_count.vet }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="bi bi-printer text-primary me-1"></i> Office
+                                </span>
+                                <span class="fw-bold">{{ expiring_soon_count.office }}</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'dashboard' %}?filter=expiring" class="btn btn-light btn-sm w-100 mt-2">
+                            <i class="bi bi-eye me-1"></i>View Details
+                        </a>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Adequate Stock Card -->
+            <div class="col-md-4">
+                <article class="card status-card bg-gradient-success text-white shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="status-icon flex-shrink-0 me-3 bg-white bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-check-circle-fill fs-2"></i>
+                            </div>
+                            <div>
+                                <h6 class="status-label text-uppercase mb-1">Adequate Stock</h6>
+                                <h2 class="status-value mb-0">
+                                    {{ stock_status.adequate.vet|add:stock_status.adequate.office }}
+                                </h2>
+                                <small class="text-white-50">Total Items</small>
+                            </div>
+                        </div>
+                        <div class="status-details px-2 py-2 rounded bg-white bg-opacity-10 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>
+                                    <i class="bi bi-capsule text-success me-1"></i> Veterinary
+                                </span>
+                                <span class="fw-bold">{{ stock_status.adequate.vet }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="bi bi-printer text-primary me-1"></i> Office
+                                </span>
+                                <span class="fw-bold">{{ stock_status.adequate.office }}</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'dashboard' %}?filter=adequate" class="btn btn-light btn-sm w-100 mt-2">
+                            <i class="bi bi-eye me-1"></i>View Details
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="row g-4">
+        <!-- Activity Column -->
+        <div class="col-lg-7">
+            <article class="card activity-card shadow-sm h-100">
+                <header class="card-header d-flex align-items-center justify-content-between bg-light">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-activity text-primary me-2"></i>Recent Activity
+                    </h3>
+                    <a href="{% url 'inventory-movements' %}" class="btn btn-sm btn-outline-secondary">
+                        View All <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </header>
+                <div class="card-body p-0">
+                    {% if movements %}
+                    <div class="list-group list-group-flush">
+                        {% for movement in movements %}
+                        <div class="list-group-item border-0 py-3 px-4 hover-bg-light">
+                            <div class="d-flex align-items-center">
+                                <div class="badge-icon bg-{{ movement.get_badge_class }}-subtle text-{{ movement.get_badge_class }} me-3">
+                                    <i class="bi {% if movement.action == 'created' %}bi-plus-lg
+                                              {% elif movement.action == 'restocked' %}bi-arrow-up
+                                              {% elif movement.action == 'depleted' %}bi-arrow-down
+                                              {% else %}bi-activity{% endif %} fs-5">
+                                    </i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <h6 class="mb-0">{{ movement.item_name }}</h6>
+                                        <small class="text-muted ms-2" title="{{ movement.timestamp|date:'Y-m-d H:i' }}">
+                                            {{ movement.get_relative_time }} ago
+                                        </small>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-{{ movement.get_badge_class }}-subtle text-{{ movement.get_badge_class }} me-2">
+                                            {{ movement.action|title }}
+                                        </span>
+                                        <small class="text-muted">
+                                            {{ movement.get_formatted_change }} {{ movement.unit|default:'units' }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state text-center py-5">
+                        <i class="bi bi-inbox text-muted fs-1"></i>
+                        <p class="text-muted mt-2 mb-0">No recent activity found</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </article>
+        </div>
+
+        <!-- Alerts Column -->
+        <div class="col-lg-5">
+            <article class="card h-100 shadow-sm">
+                <div class="card-header bg-light">
+                    <h3 class="h5 mb-0">
+                        <i class="bi bi-bell text-primary me-2"></i>Alerts Summary
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning alert-dismissible fade show">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clock-history fs-4 me-3"></i>
+                            <div class="flex-grow-1">
+                                <h5 class="alert-heading mb-2">Expiring Soon</h5>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                         style="width: {{ expiring_soon_percent }}%">
+                                    </div>
+                                </div>
+                                <div class="row small">
+                                    <div class="col">
+                                        <div>Veterinary</div>
+                                        <strong>{{ expiring_soon_count.vet }}</strong>
+                                    </div>
+                                    <div class="col">
+                                        <div>Office</div>
+                                        <strong>{{ expiring_soon_count.office }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-octagon fs-4 me-3"></i>
+                            <div class="flex-grow-1">
+                                <h5 class="alert-heading mb-2">Low Stock</h5>
+                                <div class="row small">
+                                    <div class="col">
+                                        <div>Veterinary</div>
+                                        <strong class="text-danger">{{ low_stock_count.vet }}</strong>
+                                    </div>
+                                    <div class="col">
+                                        <div>Office</div>
+                                        <strong class="text-danger">{{ low_stock_count.office }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info alert-dismissible fade show">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-hourglass-split fs-4 me-3"></i>
+                            <div class="flex-grow-1">
+                                <h5 class="alert-heading mb-2">Pending Requests</h5>
+                                <div class="row small">
+                                    <div class="col">
+                                        <div>Veterinary</div>
+                                        <strong>{{ pending_total.vet }}</strong>
+                                    </div>
+                                    <div class="col">
+                                        <div>Office</div>
+                                        <strong>{{ pending_total.office }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <!-- Filtered Items Section -->
+    {% if filtered_supplies %}
+    <section class="filtered-items mt-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-{{ current_filter|yesno:'warning,light' }} d-flex justify-content-between align-items-center">
+                <h3 class="h5 mb-0">
+                    <i class="bi bi-filter-square text-primary me-2"></i>
+                    {{ current_filter|title }} Stock Items
+                </h3>
+                <span class="badge bg-primary">Total: {{ filtered_supplies|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs nav-fill border-bottom" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active py-3" data-bs-toggle="tab" data-bs-target="#vet-supplies" type="button" role="tab">
+                            <i class="bi bi-heart-pulse me-2"></i>
+                            <span class="d-inline-block">Veterinary Supplies</span>
+                            <span class="badge bg-danger ms-2">{{ vet_supplies|length }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link py-3" data-bs-toggle="tab" data-bs-target="#office-supplies" type="button" role="tab">
+                            <i class="bi bi-briefcase me-2"></i>
+                            <span class="d-inline-block">Office Supplies</span>
+                            <span class="badge bg-primary ms-2">{{ office_supplies|length }}</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab content -->
+                <div class="tab-content">
+                    <!-- Veterinary Supplies Tab -->
+                    <div id="vet-supplies" class="tab-pane active">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Category</th>
+                                        <th>Current Stock</th>
+                                        <th>Min. Required</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for supply in filtered_supplies %}
+                                    {% if supply.type == 'vet' %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-capsule text-danger me-2"></i>
+                                                <div>
+                                                    <h6 class="mb-0">{{ supply.name }}</h6>
+                                                    <small class="text-muted">{{ supply.description|truncatechars:50 }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-secondary">{{ supply.category }}</span></td>
+                                        <td>
+                                            <strong class="{% if supply.quantity <= supply.minimum_stock %}text-danger{% endif %}">
+                                                {{ supply.quantity }}
+                                            </strong> 
+                                            {{ supply.unit }}
+                                        </td>
+                                        <td>{{ supply.minimum_stock }} {{ supply.unit }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ supply.stock_status }}-subtle text-{{ supply.stock_status }}">
+                                                {{ supply.stock_status|title }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            {% if supply.type == 'vet' %}
+                                                <a href="{% url 'vet-supply-detail' supply.id %}" class="btn btn-sm btn-outline-success">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                {% if user.is_staff %}
+                                                <a href="{% url 'vet-supply-update' supply.id %}" class="btn btn-sm btn-outline-success">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                {% endif %}
+                                            {% else %}
+                                                <a href="{% url 'office-supply-detail' supply.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                {% if user.is_staff %}
+                                                <a href="{% url 'office-supply-update' supply.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Office Supplies Tab -->
+                    <div id="office-supplies" class="tab-pane fade">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Category</th>
+                                        <th>Current Stock</th>
+                                        <th>Min. Required</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for supply in filtered_supplies %}
+                                    {% if supply.type == 'office' %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-pencil text-primary me-2"></i>
+                                                <div>
+                                                    <h6 class="mb-0">{{ supply.name }}</h6>
+                                                    <small class="text-muted">{{ supply.description|truncatechars:50 }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-info">{{ supply.category }}</span></td>
+                                        <td>
+                                            <strong class="{% if supply.quantity <= supply.minimum_stock %}text-danger{% endif %}">
+                                                {{ supply.quantity }}
+                                            </strong> 
+                                            {{ supply.unit }}
+                                        </td>
+                                        <td>{{ supply.minimum_stock }} {{ supply.unit }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ supply.stock_status }}-subtle text-{{ supply.stock_status }}">
+                                                {{ supply.stock_status|title }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'office-supply-detail' supply.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            {% if user.is_staff %}
+                                            <a href="{% url 'office-supply-update' supply.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Reports Section -->
+    <section class="reports mt-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h3 class="h5 mb-0">
+                    <i class="bi bi-download text-primary me-2"></i>Export Reports
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Add Filter Form -->
+                <form method="get" action="{% url 'export-report' %}" class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-funnel me-2"></i>Apply Filter
+                        </button>
+                    </div>
+                </form>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="{% url 'export-report' %}?type=all" 
+                           class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
+                           <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                           Full Inventory Report
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'export-report' %}?type=vet" 
+                           class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center">
+                           <i class="bi bi-heart-pulse me-2"></i>
+                           Veterinary Supplies
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'export-report' %}?type=office" 
+                           class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center">
+                           <i class="bi bi-briefcase me-2"></i>
+                           Office Supplies
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Supply Trend Chart
+    const supplyElement = document.querySelector("#supplyTrendChart");
+    const supplyData = {{ supply_trends|safe }};
+    
+    if (supplyElement) {
+        const supplyOptions = {
+            series: supplyData.series,
+            chart: {
+                height: 350,
+                type: 'area',
+                toolbar: {
+                    show: false
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2
+            },
+            xaxis: {
+                type: 'datetime',
+                categories: supplyData.dates
+            },
+            yaxis: {
+                title: {
+                    text: 'Quantity'
+                }
+            },
+            tooltip: {
+                x: {
+                    format: 'dd MMM yyyy'
+                }
+            },
+            colors: ['#2196F3', '#4CAF50', '#FFC107'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.2
+                }
+            }
+        };
+
+        const supplyChart = new ApexCharts(supplyElement, supplyOptions);
+        supplyChart.render();
+
+        // Handle range buttons
+        const rangeButtons = document.querySelectorAll('[data-range]');
+        rangeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                rangeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                const range = this.dataset.range;
+                const filtered = filterData(supplyData, range);
+                supplyChart.updateOptions({
+                    xaxis: {
+                        categories: filtered.dates
+                    }
+                });
+                supplyChart.updateSeries(filtered.series);
+            });
+        });
+    }
+
+    // Helper function to filter data by range
+    function filterData(data, range) {
+        const days = range === 'week' ? 7 : 30;
+        return {
+            dates: data.dates.slice(-days),
+            series: data.series.map(series => ({
+                name: series.name,
+                data: series.data.slice(-days)
+            }))
+        };
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart initialization code
+    const activityElement = document.querySelector("#activityChart");
+    const activityData = {{ chart_data|safe }};
+    let activityChart;
+
+    if (activityElement) {
+        const activityOptions = {
+            series: activityData.series,
+            chart: {
+                height: 350,
+                type: 'area',
+                toolbar: {
+                    show: false
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            xaxis: {
+                type: 'datetime',
+                categories: activityData.dates
+            },
+            tooltip: {
+                x: {
+                    format: 'dd MMM yyyy'
+                }
+            },
+            colors: ['#2196F3', '#4CAF50', '#FFC107', '#9C27B0']
+        };
+        activityChart = new ApexCharts(activityElement, activityOptions);
+        activityChart.render();
+    }
+
+    // Add range toggle handlers
+    const rangeButtons = document.querySelectorAll('[data-range]');
+    rangeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Toggle active class
+            rangeButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            // Get selected range
+            const range = this.dataset.range;
+            
+            // Filter data based on range
+            const today = new Date();
+            const filteredDates = [];
+            const filteredData = activityData.series.map(series => {
+                return {
+                    name: series.name,
+                    data: series.data.slice(range === 'week' ? -7 : -30)
+                };
+            });
+
+            // Update chart
+            activityChart.updateSeries(filteredData);
+        });
+    });
+});
+
+// Initialize stock distribution chart
+const stockElement = document.querySelector("#stockDistributionChart");
+if (stockElement) {
+    const rawData = {{ type_chart_data|safe }};
+    const stockOptions = {
+        series: rawData.series,
+        chart: {
+            type: 'pie',
+            height: 350
+        },
+        labels: rawData.labels,
+        colors: ['#4CAF50', '#2196F3'],
+        legend: {
+            position: 'bottom',
+            fontSize: '14px'
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 300
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }],
+        dataLabels: {
+            enabled: true,
+            formatter: function(val) {
+                return val.toFixed(1) + '%'
+            }
+        }
+    };
+
+    const stockChart = new ApexCharts(stockElement, stockOptions);
+    stockChart.render();
+
+    // Handle refresh button click
+    document.getElementById('refreshChart').addEventListener('click', function() {
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newData = JSON.parse(doc.getElementById('stockDistribution').textContent);
+                stockChart.updateOptions({
+                    labels: newData.labels,
+                    series: newData.series
+                });
+            });
+    });
+}
+</script>
+{% endblock extra_scripts %}
+{% endblock content %}

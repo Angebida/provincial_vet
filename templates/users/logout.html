@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-box-arrow-right"></i> Confirm Logout</h4>
+            </div>
+            <div class="card-body text-center">
+                <p class="lead mb-4">Are you sure you want to logout?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-box-arrow-right"></i> Yes, Logout
+                        </button>
+                        <a href="{% url 'home' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

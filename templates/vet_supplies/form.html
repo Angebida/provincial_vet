@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0">
+            <i class="bi bi-{% if object %}pencil{% else %}plus-circle{% endif %}"></i>
+            {% if object %}Edit{% else %}Add New{% endif %} Veterinary Supply
+        </h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'vet-supply-list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Save Supply
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

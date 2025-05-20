@@ -1,0 +1,42 @@
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+    {% if current_filter %}
+    <div class="text-center mb-3">
+        <span class="badge bg-secondary">
+            {{ request.GET.type|default:'All'|title }} Supplies - 
+            {{ current_filter|title }} Stock Level
+        </span>
+    </div>
+    {% endif %}
+    
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.action %}action={{ request.GET.action }}&{% endif %}{% if current_filter %}filter={{ current_filter }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                <i class="bi bi-chevron-left"></i> Previous
+            </a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.action %}action={{ request.GET.action }}&{% endif %}{% if current_filter %}filter={{ current_filter }}&{% endif %}page={{ num }}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.action %}action={{ request.GET.action }}&{% endif %}{% if current_filter %}filter={{ current_filter }}&{% endif %}page={{ page_obj.next_page_number }}">
+                Next <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}

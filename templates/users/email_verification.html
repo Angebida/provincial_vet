@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h2>Verify your email address</h2>
+    <p>Hi {{ user.username }},</p>
+    <p>Please click the button below to verify your email address:</p>
+    
+    <a href="{{ verification_url }}" class="btn">Verify Email</a>
+    
+    <p>If the button doesn't work, copy and paste this link into your browser:</p>
+    <p>{{ verification_url }}</p>
+    
+    <p>This link will expire in 24 hours.</p>
+</body>
+</html>

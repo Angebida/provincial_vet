@@ -1,0 +1,141 @@
+.navbar {
+    background: linear-gradient(135deg, var(--vet-dark) 0%, #1a3f45 100%) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.75rem 1rem;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--vet-light) !important;
+    letter-spacing: -0.5px;
+}
+
+.navbar-brand img {
+    height: 36px;
+    width: auto;
+    margin-right: 0.75rem;
+}
+
+.nav-item .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    margin: 0 0.25rem;
+}
+
+.nav-item .nav-link:hover,
+.nav-item .nav-link:focus {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.nav-item.active .nav-link {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff !important;
+    font-weight: 500;
+}
+
+.navbar .nav-item + .nav-item {
+    margin-left: 0.5rem;
+}
+
+/* Add gap between nav sections */
+.navbar .nav-item .nav-link.text-muted {
+    padding: 0.75rem 1rem;
+    cursor: default;
+}
+
+.dropdown-menu {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem;
+    min-width: 200px;
+    margin-top: 0.5rem;
+    right: 0;
+    left: auto;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+    background: var(--vet-light);
+    color: var(--vet-dark);
+    transform: translateX(5px);
+}
+
+.dropdown-item:active {
+    background-color: var(--vet-dark);
+}
+
+.dropdown-item i {
+    margin-right: 0.75rem;
+    width: 1.25rem;
+    text-align: center;
+}
+
+.navbar-toggler {
+    border: none;
+    padding: 0.5rem;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+/* Mobile Navigation Styles */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem;
+    }
+
+    .navbar-brand {
+        font-size: 1rem;
+    }
+
+    .navbar-brand img {
+        height: 28px;
+    }
+
+    .navbar-toggler {
+        padding: 0.25rem;
+    }
+
+    .dropdown-menu {
+        border-radius: 0.5rem;
+        margin-top: 0;
+        position: static;
+        box-shadow: none;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-item .nav-link {
+        padding: 0.5rem;
+        margin: 0.25rem 0;
+    }
+
+    .navbar-nav .nav-link {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    /* Improve dropdown items spacing */
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+    }
+
+    /* Make separator more visible */
+    .nav-item .nav-link.text-muted {
+        display: none;
+    }
+}

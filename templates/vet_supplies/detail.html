@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0"><i class="bi bi-info-circle"></i> Supply Details</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="card-title">Basic Information</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <th style="width: 150px;">Name:</th>
+                        <td>{{ supply.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Category:</th>
+                        <td>{{ supply.category.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Current Stock:</th>
+                        <td>
+                            <span class="{% if supply.stock_status == 'low' %}text-danger{% else %}text-success{% endif %}">
+                                {{ supply.quantity }} {{ supply.unit.display_name }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Min. Required:</th>
+                        <td>{{ supply.minimum_stock }} {{ supply.unit.display_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Reorder Level:</th>
+                        <td>{{ supply.reorder_level }} {{ supply.unit.display_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            <span class="badge bg-{% if supply.stock_status == 'out' %}danger{% elif supply.stock_status == 'low' %}warning{% else %}success{% endif %}">
+                                {{ supply.stock_status|title }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% if supply.expiration_date %}
+                    <tr>
+                        <th>Expiration Date:</th>
+                        <td>
+                            {{ supply.expiration_date|date:"Y-m-d" }}
+                            {% if supply.expiration_status == 'expired' %}
+                                <span class="badge bg-danger ms-2">Expired</span>
+                            {% elif supply.expiration_status == 'expiring-soon' %}
+                                <span class="badge bg-warning ms-2">Expiring Soon</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5 class="card-title">Notes</h5>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        {{ supply.notes|linebreaks|default:"No notes available." }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'vet-supply-list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+            {% if user.is_staff %}
+            <a href="{% url 'vet-supply-update' supply.pk %}" class="btn btn-success">
+                <i class="bi bi-pencil"></i> Edit Supply
+            </a>
+            {% endif %}
+            <a href="{% url 'vet-request-create' %}?supply={{ supply.pk }}" class="btn btn-primary">
+                <i class="bi bi-cart-plus"></i> Request Supply
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

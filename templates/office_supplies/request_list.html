@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-list-check"></i> Office Supply Requests</h4>
+    </div>
+    <div class="card-body">
+        <div class="d-flex justify-content-between mb-4">
+            <a href="{% url 'office-request-create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Request
+            </a>
+            <div class="badge bg-warning fs-5">
+                Pending Requests: {{ pending_count }}
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Supply</th>
+                        <th>Quantity</th>
+                        <th>Requester</th>
+                        <th>Status</th>
+                        <th>Request Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in requests %}
+                    <tr>
+                        <td>
+                            {% if request.is_bulk %}
+                                <span class="badge bg-info me-2">Bulk</span>
+                                {{ request.items.count }} items
+                            {% else %}
+                                {{ request.supply.name }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if request.is_bulk %}
+                                {% with total=request.items.count %}
+                                    {{ total }} item{{ total|pluralize }}
+                                {% endwith %}
+                            {% else %}
+                                {{ request.quantity }} {{ request.supply.unit.display_name }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ request.requester.username }}
+                            {% if request.requester.is_superuser %}
+                                <span class="badge bg-danger">Admin</span>
+                            {% elif request.requester.is_staff %}
+                                <span class="badge bg-info">Staff</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if request.status == 'approved' %}success{% elif request.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                {{ request.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ request.request_date|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <a href="{% url 'office-request-detail' request.pk %}" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if user.is_staff %}
+                            <a href="{% url 'office-request-approve' request.pk %}" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-check-circle"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

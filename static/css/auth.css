@@ -1,0 +1,89 @@
+.auth-wrapper {
+    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 768px;  /* Increased from 520px */
+}
+
+.auth-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-body {
+    padding: 3.5rem;  /* Increased padding */
+}
+
+.auth-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 1.75rem;  /* Larger title */
+    margin-bottom: 1rem;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.25);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;  /* More spacing between form groups */
+}
+
+.form-label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    padding: 0.75rem 1rem;  /* Larger input fields */
+    font-size: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;  /* Larger buttons */
+    font-size: 1rem;
+}
+
+.input-group {
+    margin-bottom: 1rem;
+}
+
+.input-group .form-control {
+    min-height: 52px;  /* Taller input fields */
+    font-size: 1.1rem;  /* Larger font */
+}
+
+.input-group .btn {
+    min-height: 52px;  /* Match input height */
+    font-size: 1.1rem;  /* Larger font */
+}
+
+.password-requirements {
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 0.75rem;
+}
+
+.password-requirements div {
+    margin-bottom: 0.5rem;
+}
+
+.password-requirements div:last-child {
+    margin-bottom: 0;
+}

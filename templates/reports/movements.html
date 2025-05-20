@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load vet_supplies_extras %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-info text-white">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">
+                <i class="bi bi-clock-history"></i> Inventory Movements
+            </h4>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-light" data-bs-toggle="collapse" data-bs-target="#filterPanel">
+                    <i class="bi bi-funnel"></i> Advanced Filter
+                    {% if request.GET.type or request.GET.action or request.GET.start_date %}
+                    <span class="badge bg-primary ms-1">Active</span>
+                    {% endif %}
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-filter"></i> Quick Filter
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><h6 class="dropdown-header">Supply Type</h6></li>
+                        <li><a class="dropdown-item {% if request.GET.type == 'vet' %}active{% endif %}" href="?type=vet">
+                            <i class="bi bi-capsule me-2"></i>Veterinary Supplies
+                            {% if type_counts.vet %}<span class="badge bg-secondary ms-2">{{ type_counts.vet }}</span>{% endif %}
+                        </a></li>
+                        <li><a class="dropdown-item {% if request.GET.type == 'office' %}active{% endif %}" href="?type=office">
+                            <i class="bi bi-printer me-2"></i>Office Supplies
+                            {% if type_counts.office %}<span class="badge bg-secondary ms-2">{{ type_counts.office }}</span>{% endif %}
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Actions</h6></li>
+                        {% for action, label in actions %}
+                        <li><a class="dropdown-item {% if request.GET.action == action %}active{% endif %}" href="?action={{ action }}">
+                            {{ label }}
+                            {% if action_counts|get_item:action %}<span class="badge bg-secondary ms-2">{{ action_counts|get_item:action }}</span>{% endif %}
+                        </a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <a href="{% url 'export-report' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-light">
+                    <i class="bi bi-download"></i> Export
+                    {% if request.GET %}
+                    <span class="badge bg-info ms-1">Filtered</span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Filter Panel -->
+    <div id="filterPanel" class="collapse {% if request.GET.start_date or request.GET.end_date %}show{% endif %}">
+        <div class="card-body bg-light border-bottom">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Type</label>
+                    <select name="type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="vet" {% if request.GET.type == 'vet' %}selected{% endif %}>Veterinary</option>
+                        <option value="office" {% if request.GET.type == 'office' %}selected{% endif %}>Office</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Action</label>
+                    <select name="action" class="form-select">
+                        <option value="">All Actions</option>
+                        {% for action, label in actions %}
+                        <option value="{{ action }}" {% if request.GET.action == action %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="btn-group w-100">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Apply
+                        </button>
+                        <a href="{% url 'inventory-movements' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x"></i> Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Action</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Unit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movement in movements %}
+                    <tr>
+                        <td>{{ movement.timestamp|date:"Y-m-d H:i" }}</td>
+                        <td>{{ movement.item_name }}</td>
+                        <td>{{ movement.category }}</td>
+                        <td>
+                            <span class="badge bg-{% if movement.item_type == 'vet' %}success{% else %}primary{% endif %}">
+                                {{ movement.item_type|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ movement.get_badge_class }}">
+                                {% if movement.action == 'created' %}
+                                    New Item Added
+                                {% elif movement.action == 'restocked' %}
+                                    Restocked
+                                {% elif movement.action == 'depleted' %}
+                                    Depleted
+                                {% elif movement.action == 'deleted' %}
+                                    Deleted
+                                {% elif movement.action == 'request_approved' %}
+                                    Request Approved
+                                {% else %}
+                                    {{ movement.action|title }}
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>{{ movement.previous_quantity|default:"-" }}</td>
+                        <td>{{ movement.quantity }}</td>
+                        <td>{{ movement.unit }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center p-4">
+                            <i class="bi bi-clock-history text-muted fs-1"></i>
+                            <p class="text-muted mt-2">No movement records found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'includes/pagination.html' %}
+    </div>
+
+    <div class="card-footer">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="{% url 'export-report' %}{% if request.GET %}?{{ request.GET.urlencode }}&{% else %}?{% endif %}type=all" 
+                   class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
+                   <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                   Full Inventory Report
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'export-report' %}{% if request.GET %}?{{ request.GET.urlencode }}&{% else %}?{% endif %}type=vet" 
+                   class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center">
+                   <i class="bi bi-heart-pulse me-2"></i>
+                   Veterinary Supplies
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'export-report' %}{% if request.GET %}?{{ request.GET.urlencode }}&{% else %}?{% endif %}type=office" 
+                   class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center">
+                   <i class="bi bi-briefcase me-2"></i>
+                   Office Supplies
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

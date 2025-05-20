@@ -1,0 +1,85 @@
+body {
+    margin: 0;
+    padding: 0; 
+    overflow: hidden;
+    background-color: #343a40;
+}
+
+.auth-wrapper {
+    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+    backdrop-filter: blur(8px);
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 480px;  /* Increased from 360px */
+}
+
+.auth-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-body {
+    padding: 2.5rem;  /* Increased padding */
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.auth-title {
+    color: #dc3545;
+    font-weight: 600;
+    font-size: 1.75rem;  /* Larger title */
+    margin-bottom: 1rem;
+}
+
+.form-control:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.form-label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    height: auto;
+}
+
+.input-group-text {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}

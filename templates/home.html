@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body_class %}home-page{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="home-section">
+    <div class="container py-5" style="background: transparent !important;">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold text-white mb-4 animate__animated animate__fadeIn">
+                        Welcome to the Masbate Provincial Veterinary Office Supply Inventory Management System
+                    </h1>
+                    <p class="lead text-white mb-5 animate__animated animate__fadeIn animate__delay-1s">
+                        Inventory Management System
+                    </p>
+                </div>
+
+                {% if not user.is_authenticated %}
+                <div class="d-flex justify-content-center gap-4 mb-5 animate__animated animate__fadeInUp animate__delay-1s">
+                    <a href="{% url 'admin-login' %}" class="btn btn-danger btn-lg px-4">
+                        <i class="fas fa-user-shield me-2"></i>Admin Login
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-success btn-lg px-4">
+                        <i class="fas fa-user me-2"></i>User Login
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                <div class="row justify-content-center g-4 animate__animated animate__fadeInUp">
+                    <div class="col-md-{% if user.is_staff %}4{% else %}6{% endif %}">
+                        <a href="{% url 'vet-supply-list' %}" class="card-link text-decoration-none">
+                            <div class="card home-card h-100">
+                                <div class="card-body p-4">
+                                    <div class="text-center mb-3">
+                                        <i class="fas fa-syringe fa-3x text-success"></i>
+                                    </div>
+                                    <h5 class="card-title text-center mb-3">Veterinary Supplies</h5>
+                                    <p class="card-text text-muted text-center">
+                                        Manage medical supplies and equipment
+                                    </p>
+                                    <div class="d-grid mt-4">
+                                        <a href="{% url 'vet-supply-list' %}" class="btn btn-outline-success">
+                                            <i class="fas fa-arrow-right me-2"></i>View Supplies
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-{% if user.is_staff %}4{% else %}6{% endif %}">
+                        <a href="{% url 'office-supply-list' %}" class="card-link text-decoration-none">
+                            <div class="card home-card h-100">
+                                <div class="card-body p-4">
+                                    <div class="text-center mb-3">
+                                        <i class="fas fa-box fa-3x text-primary"></i>
+                                    </div>
+                                    <h5 class="card-title text-center mb-3">Office Supplies</h5>
+                                    <p class="card-text text-muted text-center">
+                                        Track office materials and resources
+                                    </p>
+                                    <div class="d-grid mt-4">
+                                        <a href="{% url 'office-supply-list' %}" class="btn btn-outline-primary">
+                                            <i class="fas fa-arrow-right me-2"></i>View Supplies
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    {% if user.is_staff %}
+                    <div class="col-md-4">
+                        <a href="{% url 'dashboard' %}" class="card-link text-decoration-none">
+                            <div class="card home-card h-100">
+                                <div class="card-body p-4">
+                                    <div class="text-center mb-3">
+                                        <i class="fas fa-chart-line fa-3x text-info"></i>
+                                    </div>
+                                    <h5 class="card-title text-center mb-3">Analytics</h5>
+                                    <p class="card-text text-muted text-center">
+                                        View reports and track inventory trends
+                                    </p>
+                                    <div class="d-grid mt-4">
+                                        <a href="{% url 'dashboard' %}" class="btn btn-outline-info">
+                                            <i class="fas fa-arrow-right me-2"></i>View Reports
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+body.home-page {
+    padding-top: 0 !important;
+}
+
+.home-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.home-card {
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.home-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.animate__animated {
+    animation-duration: 1s;
+}
+
+.animate__delay-1s {
+    animation-delay: 0.5s;
+}
+
+.display-4, .lead {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+</style>
+
+{% endblock content %}

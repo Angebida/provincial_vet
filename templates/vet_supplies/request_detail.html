@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0"><i class="bi bi-info-circle"></i> Request Details</h4>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5 class="card-title">Request Information</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <th style="width: 150px;">Request ID:</th>
+                        <td>#{{ request.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Requester:</th>
+                        <td>
+                            {{ request.requester.username }}
+                            {% if request.requester.is_superuser %}
+                                <span class="badge bg-danger">Admin</span>
+                            {% elif request.requester.is_staff %}
+                                <span class="badge bg-info">Staff</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            <span class="badge bg-{% if request.status == 'approved' %}success{% elif request.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                {{ request.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Request Date:</th>
+                        <td>{{ request.request_date|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% if request.approved_by %}
+                    <tr>
+                        <th>Approved By:</th>
+                        <td>{{ request.approved_by.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Approval Date:</th>
+                        <td>{{ request.approval_date|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5 class="card-title">Purpose</h5>
+                <p class="card-text">{{ request.purpose|default:"No purpose specified" }}</p>
+            </div>
+        </div>
+
+        <h5 class="card-title">Requested Items</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                        <th>Unit</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if request.is_bulk %}
+                        {% for item in request.items.all %}
+                        <tr>
+                            <td>{{ item.supply.name }}</td>
+                            <td>{{ item.supply.category.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.supply.unit.display_name }}</td>
+                            <td>
+                                <span class="badge bg-{% if request.status == 'approved' %}success{% elif request.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                    {{ request.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td>{{ request.supply.name }}</td>
+                            <td>{{ request.supply.category.name }}</td>
+                            <td>{{ request.quantity }}</td>
+                            <td>{{ request.supply.unit.display_name }}</td>
+                            <td>
+                                <span class="badge bg-{% if request.status == 'approved' %}success{% elif request.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                    {{ request.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'vet-request-list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+            {% if user.is_staff and request.status == 'pending' %}
+            <a href="{% url 'vet-request-update' request.pk %}" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> Review Request
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

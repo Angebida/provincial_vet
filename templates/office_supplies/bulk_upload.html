@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-secondary text-white">
+        <h4 class="mb-0"><i class="bi bi-cloud-upload"></i> Bulk Upload Office Supplies</h4>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-upload"></i> Upload CSV
+                </button>
+                <a href="{% url 'office-supply-list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+        </form>
+        
+        <div class="mt-4">
+            <h5>CSV Format:</h5>
+            <div class="d-flex align-items-center mb-3">
+                <a href="{% static 'templates/office_supplies_template.csv' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-download"></i> Download Template
+                </a>
+            </div>
+            <pre class="bg-light p-3 rounded">
+name,category,quantity,unit,reorder_level,notes
+Paper A4,Paper Supplies,100,reams,20,Sample notes
+Stapler,Office Tools,30,units,5,More notes</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0">
+            <i class="bi bi-cart-plus"></i> Request Supplies
+        </h4>
+    </div>
+    <div class="card-body">
+        <form method="post" id="bulkRequestForm">
+            {% csrf_token %}
+            <input type="hidden" name="items" id="id_items">
+            
+            <!-- Item Selection Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="mb-3">Add Items</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Supply</label>
+                            <select class="form-select" id="supplySelect">
+                                <option value="">Select supply...</option>
+                                {% for supply in supplies %}
+                                <option value="{{ supply.id }}" 
+                                        data-unit="{{ supply.unit }}" 
+                                        data-quantity="{{ supply.quantity }}">
+                                    {{ supply.name }} ({{ supply.quantity }} {{ supply.unit }} available)
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted mt-1 d-block">Available: <span id="availableStock">-</span></small>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Quantity</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="quantityInput" 
+                                       min="1" value="1" step="1">
+                                <span class="input-group-text" id="unitDisplay"></span>
+                            </div>
+                            <div id="quantityError" class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-success w-100" id="addItemBtn">
+                                <i class="bi bi-plus-lg"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Items Table -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="mb-3">Selected Items</h5>
+                    <div class="table-responsive">
+                        <table class="table" id="itemsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item</th>
+                                    <th style="width: 150px;">Quantity</th>
+                                    <th style="width: 80px;" class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="empty-row">
+                                    <td colspan="3" class="text-center py-4 text-muted">
+                                        <i class="bi bi-cart"></i> No items added yet
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Request Details -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label for="id_purpose">Purpose</label>
+                        {{ form.purpose }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between">
+                <a href="{% url 'vet-request-list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-send"></i> Submit Request
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<template id="empty-form-template">
+  <tr class="formset-row">
+    <td>
+      <input type="hidden" name="items-__prefix__-supply">
+      <span class="supply-name"></span>
+    </td>
+    <td>
+      <input type="number" name="items-__prefix__-quantity" class="form-control form-control-sm" min="1">
+      <span class="unit-display ms-2"></span>
+    </td>
+    <td class="text-end">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-item">
+        <i class="bi bi-trash"></i>
+      </button>
+    </td>
+  </tr>
+</template>
+
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const MAX_ITEMS = 20;
+    const formsetContainer = document.querySelector('#itemsTable tbody');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const supplySelect = document.getElementById('supplySelect');
+    const quantityInput = document.getElementById('quantityInput');
+
+    // Update supply information when selection changes
+    function updateSupplyInfo() {
+        const selectedOption = supplySelect.selectedOptions[0];
+        if (selectedOption.value) {
+            const unit = selectedOption.dataset.unit;
+            const available = selectedOption.dataset.quantity;
+            document.getElementById('unitDisplay').textContent = unit;
+            document.getElementById('availableStock').textContent = `${available} ${unit} available`;
+            quantityInput.max = available;
+        } else {
+            document.getElementById('unitDisplay').textContent = '';
+            document.getElementById('availableStock').textContent = '-';
+        }
+    }
+
+    // Handle add item button click
+    addItemBtn.addEventListener('click', function() {
+        if (!supplySelect.value) {
+            showError('Please select a supply first');
+            return;
+        }
+
+        const quantity = parseInt(quantityInput.value);
+        const selectedOption = supplySelect.selectedOptions[0];
+        
+        if (isNaN(quantity) || quantity < 1) {
+            showError('Please enter a valid quantity');
+            return;
+        }
+
+        if (quantity > parseInt(selectedOption.dataset.quantity)) {
+            showError(`Cannot exceed available stock (${selectedOption.dataset.quantity})`);
+            return;
+        }
+
+        const existingRows = Array.from(formsetContainer.querySelectorAll('.formset-row'));
+        if (existingRows.length >= MAX_ITEMS) {
+            showError(`Maximum ${MAX_ITEMS} items allowed`);
+            return;
+        }
+
+        const existingRow = existingRows.find(row => 
+            row.querySelector('[name$="-supply"]').value === supplySelect.value
+        );
+
+        if (existingRow) {
+            if (!confirm('This item already exists. Update quantity?')) return;
+            const qtyField = existingRow.querySelector('[name$="-quantity"]');
+            const newTotal = parseInt(qtyField.value) + quantity;
+            
+            if (newTotal > parseInt(selectedOption.dataset.quantity)) {
+                showError(`Total quantity would exceed available stock`);
+                return;
+            }
+            qtyField.value = newTotal;
+        } else {
+            // Remove empty state row if present
+            const emptyRow = formsetContainer.querySelector('.empty-row');
+            if (emptyRow) emptyRow.remove();
+
+            // Add new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'formset-row';
+            newRow.innerHTML = `
+                <td>
+                    <input type="hidden" name="items-${existingRows.length}-supply" value="${supplySelect.value}">
+                    <span class="supply-name">${selectedOption.text}</span>
+                </td>
+                <td>
+                    <input type="number" name="items-${existingRows.length}-quantity" 
+                           class="form-control form-control-sm" min="1" value="${quantity}">
+                    <span class="unit-display ms-2">${selectedOption.dataset.unit}</span>
+                </td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-item">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            formsetContainer.appendChild(newRow);
+        }
+
+        // Reset quantity input
+        quantityInput.value = "1";
+    });
+
+    // Handle remove buttons
+    formsetContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-item')) {
+            const row = e.target.closest('.formset-row');
+            row.remove();
+
+            const rows = formsetContainer.querySelectorAll('.formset-row');
+            if (rows.length === 0) {
+                formsetContainer.innerHTML = `
+                    <tr class="empty-row">
+                        <td colspan="3" class="text-center py-4 text-muted">
+                            <i class="bi bi-cart"></i> No items added yet
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+    });
+
+    function showError(message) {
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.card-body').prepend(alert);
+        setTimeout(() => alert.remove(), 5000);
+    }
+
+    // Form validation
+    document.getElementById('bulkRequestForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+        
+        const items = [];
+        // Collect all items from the table
+        formsetContainer.querySelectorAll('.formset-row').forEach(row => {
+            items.push({
+                id: row.querySelector('[name$="-supply"]').value,
+                quantity: parseInt(row.querySelector('[name$="-quantity"]').value)
+            });
+        });
+
+        if (items.length === 0) {
+            showError('Please add at least one item to your request!');
+            return;
+        }
+
+        // Set the items JSON in the hidden input
+        document.getElementById('id_items').value = JSON.stringify(items);
+        
+        // Submit the form
+        this.submit();
+    });
+
+    // Get supply ID from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const supplyId = urlParams.get('supply');
+    
+    // If supply ID provided, select it in dropdown
+    if (supplyId) {
+        supplySelect.value = supplyId;
+        
+        // Trigger change event to update form
+        supplySelect.dispatchEvent(new Event('change'));
+        
+        // Focus quantity input
+        quantityInput.focus();
+    }
+
+    // Initialize
+    supplySelect.addEventListener('change', updateSupplyInfo);
+    updateSupplyInfo();
+});
+</script>
+{% endblock %}

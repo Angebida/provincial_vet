@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load vet_supplies_extras %}
+
+{% block content %}
+<!-- Alert Notifications -->
+<div class="container-fluid px-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-blur border-0 overflow-hidden">
+                <div class="card-body p-2">
+                    <div class="row g-2">
+                        {% if low_stock_count > 0 %}
+                        <div class="col-md-6">
+                            <div class="alert alert-gradient-red d-flex align-items-center p-3 hover-lift" 
+                                 onclick="window.location='?stock_status=low'" 
+                                 style="cursor: pointer;">
+                                <div class="alert-icon bg-red-light rounded-circle p-3 me-3">
+                                    <i class="fas fa-boxes fa-2x"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h5 class="mb-0">{{ low_stock_count }} Low Stock Items</h5>
+                                        <span class="badge bg-red-light text-white ms-2">
+                                            Critical
+                                        </span>
+                                    </div>
+                                    <div class="progress my-2" style="height: 4px;">
+                                        <div class="progress-bar bg-white" role="progressbar" 
+                                             style="width: {% widthratio low_stock_count total_supplies 100 %}%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="mb-0 small text-white-50">Immediate restocking required</p>
+                                        <span class="small text-white-50">{{ low_stock_count }}/{{ total_supplies }}</span>
+                                    </div>
+                                </div>
+                                <span class="btn btn-light btn-icon ms-3 rounded-circle">
+                                    <i class="fas fa-arrow-right"></i>
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if expiring_count > 0 %}
+                        <div class="col-md-6">
+                            <div class="alert alert-gradient-amber d-flex align-items-center p-3 hover-lift" onclick="window.location='?expiration=expiring-soon'" style="cursor: pointer;">
+                                <div class="alert-icon me-3">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h5 class="mb-0">{{ expiring_count }} Expiring Items</h5>
+                                        <span class="badge bg-warning-light text-warning ms-2">
+                                            Within 30 Days
+                                        </span>
+                                    </div>
+                                    <div class="progress my-2" style="height: 4px;">
+                                        <div class="progress-bar bg-white" role="progressbar" 
+                                             style="width: {% widthratio expiring_count total_supplies 100 %}%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="mb-0 small text-white-50">Near expiration date</p>
+                                        <span class="small text-white-50">{{ expiring_count }}/{{ total_supplies }}</span>
+                                    </div>
+                                </div>
+                                <span class="btn btn-light btn-icon ms-3">
+                                    <i class="fas fa-arrow-right"></i>
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if out_of_stock_count > 0 %}
+                        <div class="col-md-6">
+                            <div class="alert alert-gradient-teal d-flex align-items-center p-3 hover-lift" onclick="window.location='?stock_status=out'" style="cursor: pointer;">
+                                <div class="alert-icon bg-dark bg-opacity-10 rounded-circle p-3 me-3">
+                                    <i class="fas fa-box-open fa-2x"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h5 class="mb-0">{{ out_of_stock_count }} Out of Stock</h5>
+                                        <span class="badge bg-dark-light text-dark ms-2">
+                                            Critical
+                                        </span>
+                                    </div>
+                                    <div class="progress my-2" style="height: 4px;">
+                                        <div class="progress-bar bg-white" role="progressbar" 
+                                             style="width: {% widthratio out_of_stock_count total_supplies 100 %}%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="mb-0 small text-white-50">Need immediate restocking</p>
+                                        <span class="small text-white-50">{{ out_of_stock_count }}/{{ total_supplies }}</span>
+                                    </div>
+                                </div>
+                                <span class="btn btn-light btn-icon ms-3 rounded-circle">
+                                    <i class="fas fa-arrow-right"></i>
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if expired_count > 0 %}
+                        <div class="col-md-6">
+                            <div class="alert alert-gradient-purple d-flex align-items-center p-3 hover-lift" onclick="window.location='?expiration=expired'" style="cursor: pointer;">
+                                <div class="alert-icon me-3">
+                                    <i class="fas fa-calendar-times fa-2x"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h5 class="mb-0">{{ expired_count }} Expired Items</h5>
+                                        <span class="badge bg-danger-light text-danger ms-2">
+                                            Action Required
+                                        </span>
+                                    </div>
+                                    <div class="progress my-2" style="height: 4px;">
+                                        <div class="progress-bar bg-white" role="progressbar" 
+                                             style="width: {% widthratio expired_count total_supplies 100 %}%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="mb-0 small text-white-50">Expired items need attention</p>
+                                        <span class="small text-white-50">{{ expired_count }}/{{ total_supplies }}</span>
+                                    </div>
+                                </div>
+                                <span class="btn btn-light btn-icon ms-3">
+                                    <i class="fas fa-arrow-right"></i>
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="max-width: 1000px;">
+    <div class="card shadow w-100">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="bi bi-capsule"></i> Veterinary Supplies Inventory</h4>
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-4">
+                {% if user.is_staff %}
+                <div>
+                    <a href="{% url 'vet-supply-create' %}" class="btn btn-success me-2">
+                        <i class="bi bi-plus-circle"></i> Add New Supply
+                    </a>
+                    <a href="{% url 'vet-category-create' %}" class="btn btn-success me-2">
+                        <i class="bi bi-folder-plus"></i> Add Category
+                    </a>
+                    <a href="{% url 'vet-bulk-upload' %}" class="btn btn-success">
+                        <i class="bi bi-cloud-upload"></i> Bulk Upload
+                    </a>
+                </div>
+                {% endif %}
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-filter"></i> Filter by Category
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for category in categories %} 
+                        <li><a class="dropdown-item" href="?category={{ category.id }}">{{ category.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-blur border-0 mb-4">
+                <div class="card-body p-3">
+                    <form method="get" class="row g-3">
+                        <div class="col-12 col-lg-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" name="q" class="form-control border-start-0" 
+                                       placeholder="Search supplies..." 
+                                       value="{{ request.GET.q }}"
+                                       style="border-left: none;">
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-2">
+                            <select name="category" class="form-select form-select-sm text-secondary" 
+                                    data-bs-toggle="tooltip" title="Filter by category">
+                                <option value="">
+                                    <i class="bi bi-folder"></i> All Categories
+                                </option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" 
+                                        {% if request.GET.category == category.id|stringformat:"i" %}selected{% endif %}
+                                        class="text-dark">
+                                    {{ category.name|title }}
+                                    {% if category.description %}
+                                    <small class="text-muted">({{ category.description|truncatechars:30 }})</small>
+                                    {% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6 col-lg-2">
+                            <select name="stock_status" class="form-select form-select-sm text-secondary"
+                                    data-bs-toggle="tooltip" title="Filter by stock level">
+                                <option value=""><i class="bi bi-boxes"></i> All Stock Levels</option>
+                                <option value="low" {% if request.GET.stock_status == 'low' %}selected{% endif %}
+                                        class="text-danger">
+                                    <i class="bi bi-exclamation-triangle"></i> Low Stock
+                                </option>
+                                <option value="adequate" {% if request.GET.stock_status == 'adequate' %}selected{% endif %}
+                                        class="text-success">
+                                    <i class="bi bi-check-circle"></i> Adequate
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-lg-2">
+                            <select name="expiration" class="form-select form-select-sm text-secondary"
+                                    data-bs-toggle="tooltip" title="Filter by expiry status">
+                                <option value="" {% if not request.GET.expiration %}selected{% endif %}>All Expiry Status</option>
+                                <option value="expired" {% if request.GET.expiration == 'expired' %}selected{% endif %}>Expired</option>
+                                <option value="expiring-soon" {% if request.GET.expiration == 'expiring-soon' %}selected{% endif %}>Expiring Soon</option>
+                                <option value="valid" {% if request.GET.expiration == 'valid' %}selected{% endif %}>Valid</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-lg-2">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-filter me-2"></i>Apply Filters
+                            </button>
+                        </div>
+                        {% if request.GET.q or request.GET.category or request.GET.stock_status or request.GET.expiration %}
+                        <div class="col-6 col-lg-1">
+                            <a href="{% url 'vet-supply-list' %}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" style="min-width: 1000px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%">#</th>
+                            <th>Name</th>
+                            <th>Category</th> 
+                            <th>Quantity</th>
+                            <th>Unit</th>
+                            <th>Expiration</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for supply in supplies %}
+                        <tr class="{% if supply.stock_status == 'low' %}table-danger{% endif %} supply-row">
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <a href="{% url 'vet-supply-detail' supply.pk %}" class="text-decoration-none text-dark">
+                                    {{ supply.name }}
+                                </a>
+                            </td>
+                            <td>{{ supply.category }}</td>
+                            <td>{{ supply.quantity }}</td>
+                            <td>{{ supply.unit.display_name }}</td>
+                            <td>{{ supply.expiration_date|date:"Y-m-d" }}
+                                {% if supply.expiration_status == 'expired' %}
+                                    <span class="badge bg-danger ms-2">Expired</span>
+                                {% elif supply.expiration_status == 'expiring-soon' %}
+                                    <span class="badge bg-warning ms-2">Expiring Soon</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if supply.stock_status == 'out' %}black{% elif supply.stock_status == 'low' %}warning{% else %}success{% endif %}">
+                                    {{ supply.stock_status|title }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                {% if user.is_staff %}
+                                <a href="{% url 'vet-supply-update' supply.pk %}" 
+                                   class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'vet-request-create' %}?supply={{ supply.pk }}" 
+                                   class="btn btn-sm btn-outline-success" 
+                                   onclick="event.stopPropagation()">
+                                    <i class="bi bi-cart-plus"></i> Request
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% include 'includes/supply_pagination.html' %}
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+});
+</script>
+{% endblock %}
+
+<style>
+.alert-card {
+    transition: transform 0.2s;
+}
+.alert-card:hover {
+    transform: translateY(-3px);
+}
+
+/* New gradient styles for vet supplies */
+.alert-gradient-danger {
+    background: linear-gradient(45deg, #dc3545, #ff6b6b);
+    color: white;
+}
+.alert-gradient-warning {
+    background: linear-gradient(45deg, #ffc107, #ffcd39);
+    color: white;
+}
+.alert-gradient-info {
+    background: linear-gradient(45deg, #17a2b8, #45cadd);
+    color: white;
+}
+.alert-gradient-dark {
+    background: linear-gradient(45deg, #343a40, #6c757d);
+    color: white;
+}
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.progress {
+    background-color: rgba(255,255,255,0.2);
+}
+.hover-lift {
+    transition: transform 0.2s;
+}
+.hover-lift:hover {
+    transform: translateY(-2px);
+}
+</style>

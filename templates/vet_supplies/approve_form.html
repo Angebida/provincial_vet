@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0"><i class="bi bi-check-circle"></i> Approve Request</h4>
+    </div>
+    <div class="card-body">
+        <!-- Request Details -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Request Details</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Requester:</strong> {{ object.requester.username }}</p>
+                        <p><strong>Request Date:</strong> {{ object.request_date|date:"Y-m-d H:i" }}</p>
+                        <p><strong>Purpose:</strong> {{ object.purpose }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requested Items -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Requested Items</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Available Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if object.is_bulk %}
+                                {% for item in object.items.all %}
+                                <tr>
+                                    <td>{{ item.supply.name }}</td>
+                                    <td>{{ item.supply.category.name }}</td>
+                                    <td>{{ item.quantity }} {{ item.supply.unit.display_name }}</td>
+                                    <td>
+                                        {% if item.quantity > item.supply.quantity %}
+                                        <span class="text-danger">
+                                            {{ item.supply.quantity }} {{ item.supply.unit.display_name }}
+                                            (Insufficient)
+                                        </span>
+                                        {% else %}
+                                        <span class="text-success">
+                                            {{ item.supply.quantity }} {{ item.supply.unit.display_name }}
+                                            (Available)
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td>{{ object.supply.name }}</td>
+                                    <td>{{ object.supply.category.name }}</td>
+                                    <td>{{ object.quantity }} {{ object.supply.unit.display_name }}</td>
+                                    <td>
+                                        {% if object.quantity > object.supply.quantity %}
+                                        <span class="text-danger">
+                                            {{ object.supply.quantity }} {{ object.supply.unit.display_name }}
+                                            (Insufficient)
+                                        </span>
+                                        {% else %}
+                                        <span class="text-success">
+                                            {{ object.supply.quantity }} {{ object.supply.unit.display_name }}
+                                            (Available)
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approval Form -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+                {{ form.status }}
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'vet-request-list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Requests
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-lg"></i> Confirm
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
